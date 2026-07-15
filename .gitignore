@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+# engine intermediates, regenerated on every run
+assignF.json
+hoursF.json
+training.json
+
+# local exclusion holding pen (not pushed)
+_EXCLUDED_do_not_push/
