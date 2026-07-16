@@ -1,11 +1,10 @@
 """Shared data module for the crew scheduler.
 
-Holds the crew roster, each person's 7-day availability, per-position demand
-windows, and the rule flags. Both gen7_engine.py (the scheduler) and
-build8_workbook_builder.py (the Excel builder) import this module. In the
-original working copies this data lived at the top of the engine and the
-builder pulled it in with exec(open(...)); the split into a real module
-replaced that coupling for publication.
+Holds the representative crew roster, seven-day availability, per-position
+demand windows, and rule flags. Both gen7_engine.py (the scheduler) and
+build8_workbook_builder.py (the Excel builder) import this module. Publication
+consolidates the sample inputs here so the operating rules are reviewable
+without preserving historical session wiring or source-system mechanics.
 
 PUBLICATION NOTE: all crew names are pseudonyms and the labor-target numbers
 in the workbook builder are representative placeholders. Availability shapes,

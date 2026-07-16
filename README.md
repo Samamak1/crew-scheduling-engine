@@ -2,7 +2,7 @@
 
 > An AI-assisted workforce scheduling system translating 43-person availability, station qualifications, training gates, and coverage rules into a leadership-ready Excel workbook.
 
-The original versions of this tooling were used by Sama Mushtaq, then the restaurant manager responsible for the schedule, to produce posted weekly schedules. This public repository is a **sanitized representative reconstruction**: it preserves the operating model, constraints, assignment logic, workbook structure, and acceptance checks, but it does not contain the real roster, corporate labor targets, source screenshots, or an original posted schedule.
+The original versions of this tooling were used by Sama Mushtaq, then the restaurant manager responsible for the schedule, to produce posted weekly schedules. This public repository is a **sanitized representative reconstruction**: it preserves the operating model, constraints, assignment logic, workbook structure, and acceptance checks, but it does not contain the real roster, corporate labor targets, historical availability records, or an original posted schedule.
 
 ## Program brief
 
@@ -153,11 +153,7 @@ These are validation results for the anonymized sample dataset, not claims about
 | `schedule_data.py` | Public representative roster, availability, demand, and rule flags. |
 | `gen7_engine.py` | Assignment, gap-fill, rebalancing, and diagnostics. |
 | `build8_workbook_builder.py` | Leadership-facing Excel workbook generation. |
-| `sample_output/Crew_Schedule_SAMPLE.xlsx` | Representative 11-tab output. |
-| `docs/sample_schedule_tab.png` | Screenshot of the representative Schedule tab. |
-| `SCHEDULE_HANDOFF.md` | Sanitized historical AI-session handoff artifact; not current operating instruction. |
-
-`SCHEDULE_HANDOFF.md` preserves how requirements and acceptance decisions were carried across AI sessions. It still contains detailed representative weekly context and should receive a separate confidentiality review before any future republication. Vendor-specific connector mechanics and transient personnel notes are not needed for the recruiter narrative.
+| `sample_output/README.md` | Explains how to regenerate the representative 11-tab workbook locally. |
 
 ## Role, contributors, and authorship
 
@@ -181,11 +177,11 @@ AI did not independently determine store policy, employee qualifications, labor 
 ## Confidentiality
 
 - Every public crew name is a pseudonym.
-- Manager names other than Sama use generic labels.
+- No real manager roster or manager availability is included.
 - Corporate labor targets and forecasts are representative placeholders.
-- No HotSchedules screenshot, source employee record, original posted schedule, or employer document is included.
-- The public workbook is regenerated from representative data.
-- Detailed internal rules and handoff context should be reviewed periodically for triangulation risk even when names are changed.
+- No third-party scheduling screenshot, source employee record, original posted schedule, or employer document is included.
+- The downloadable historical workbook is not committed; reviewers can regenerate a fresh sample from the representative data and builder.
+- Representative constraints should be reviewed periodically for triangulation risk even when names are changed.
 
 ## Limitations
 

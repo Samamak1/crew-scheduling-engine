@@ -12,8 +12,8 @@ Output: sample_output/Crew_Schedule_SAMPLE.xlsx
 import json
 from collections import defaultdict
 from schedule_data import *  # DEMAND, CREW, fmt, DAYS, POS_ORDER, CT, KIT/DT/FC
-# (originally exec(open('gen7.py')...) pulled the engine's data section in; the shared
-#  data now lives in schedule_data.py and both scripts import it - see README)
+# Representative inputs are centralized in schedule_data.py for a reproducible
+# public build; historical source-system wiring is intentionally not preserved.
 POS_ORDER[:]=["Board1","Grill","DTExp","Board2","Board3","Toast","DTOrd","DTOI","Cash"]
 for _d in ("Thu","Fri","Sat","Sun"):
     _w=DEMAND[_d].get("Board2",[])
@@ -46,7 +46,7 @@ NAMES={"Avery":"Avery Sutton","Quinn":"Quinn Delgado","Tessa":"Tessa Vance","Emi
 "Simone":"Simone Deveraux","Freya":"Freya Adjei"}
 DISP={"Grill":"Grill","Board1":"Board 1","Board2":"Board 2","Board3":"Board 3","Toast":"Toast","DTExp":"DT Expo","DTOrd":"DT Order","DTOI":"DT Out","Cash":"Cashier","RI":"RI"}
 STN={"Grill":"K","Board1":"K","Board2":"K","Board3":"K","Toast":"K","DTExp":"D","DTOrd":"D","DTOI":"D","Cash":"F","RI":"I"}
-DATES={"Wed":"Wed 7/1","Thu":"Thu 7/2","Fri":"Fri 7/3","Sat":"Sat 7/4","Sun":"Sun 7/5","Mon":"Mon 7/6","Tue":"Tue 7/7"}
+DATES={"Wed":"Wednesday","Thu":"Thursday","Fri":"Friday","Sat":"Saturday","Sun":"Sunday","Mon":"Monday","Tue":"Tuesday"}
 GROUPS=[("PERFORMERS \u2014 priority crew, scheduled first",
          ["Quinn","Avery","Emil","Tessa","Dara","Theo","Harper","Hugo","Kwame","Rosa",
           "Paloma","Rowan","Ivy","Ezra","Bianca","Beckett","Peyton","Amina","Marco","Felix",
@@ -86,7 +86,7 @@ for n in pday:
 wb=Workbook()
 # ============ SHEET 1: SCHEDULE ============
 ws=wb.active; ws.title="Schedule"
-ws["A1"]="CREW SCHEDULE (ANONYMIZED SAMPLE)   |   Week of Wed 7/1 - Tue 7/7/26"
+ws["A1"]="CREW SCHEDULE (ANONYMIZED SAMPLE)   |   Representative Wednesday-Tuesday week"
 ws["A1"].font=ARIAL(bold=True,size=14,color="FFFFFF"); ws["A1"].fill=HEADFILL
 ws["A1"].alignment=Alignment(vertical="center",horizontal="left",indent=1)
 ws.merge_cells("A1:J1"); ws.row_dimensions[1].height=26
@@ -244,44 +244,43 @@ def line(txt,bold=False,fill=None,size=10,color="000000"):
     if fill: c.fill=fill
     nt.row_dimensions[nrow].height=15*(1+txt.count("\n")+len(txt)//110); nrow+=1
 nrow=1
-line("SCHEDULE NOTES & KEY DECISIONS   (Week of Wed 7/1 \u2013 Tue 7/7/26)",bold=True,size=13,fill=HEADFILL,color="FFFFFF")
+line("SCHEDULE NOTES & KEY DECISIONS   (Representative Wednesday-Tuesday week)",bold=True,size=13,fill=HEADFILL,color="FFFFFF")
 line("")
 line("THIS IS A PERFORMANCE-PRIORITY SCHEDULE",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
-line("\u2022 Your 27 PERFORMERS are scheduled FIRST and loaded to cover the week. The rest of the crew are FILL-INS, used only where a performer couldn't cover the slot. Result this week: performers carry ~667 hrs, fill-ins ~104 hrs.")
-line("\u2022 PERFORMERS: Quinn, Avery, Emil, Tessa, Dara, Theo, Harper Nunes, Hugo, Kwame, Rosa, Paloma, Rowan, Ivy, Ezra, Bianca, Beckett, Peyton Calloway, Amina, Marco, Felix, Ansel, Juniper Vale, Genevieve Stroud, Marlowe, Kofi, Silas, and Miles (on RI).")
-line("\u2022 FILL-INS used this week (only as needed): Priya, Lena, Selena, Lionel, Idris, Dante, Wren, Mateo, Ja'Nae, Celeste, Bishal. NOT needed this week: Odette, Simone, Freya (lowest-priority fill-ins \u2014 0 hrs).")
+line("\u2022 Core-team records are scheduled first; representative fill-in records are used only when qualified core-team availability cannot cover a required slot.")
+line("\u2022 The sample preserves tier logic and capacity tradeoffs without publishing a real weekly roster, personnel exception list, or source-system availability notes.")
 line("")
 line("HEADS-UP \u2014 PERFORMERS RUNNING OVER THEIR USUAL HOURS",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
-line("\u2022 Your performers' combined usual target hours (~535) are LESS than the week's demand (~748). To cover the week with performers first, several run above their normal target: e.g. Dara +11, Theo +10, Hugo +10, Kwame +10, Ansel +10, Beckett +11, Ivy +12. I capped the overage at +12 so nobody is pushed to a crazy number.",fill=YEL)
-line("\u2022 If some of those performers can't actually take that many hours, tell me each person's real weekly max and I'll let a few more fill-in shifts absorb the difference. If you'd rather push fill-ins even lower, I can raise the cap and a few performers will run closer to 40.",fill=YEL)
-line("\u2022 A few performers land UNDER their target (Tessa, Bianca, Felix) \u2014 that's their own availability limiting them, not deprioritization. They got every slot they were available for.")
+line("\u2022 Representative core-team target hours are lower than modeled demand, so some sample records run above target within the encoded overage cap.",fill=YEL)
+line("\u2022 A manager can lower individual maximums or route more work to qualified fill-ins; the workbook surfaces those tradeoffs for review rather than treating the first feasible output as final.",fill=YEL)
+line("\u2022 Under-target results can reflect availability, qualification, or demand-shape constraints and require manager review before acceptance.")
 line("")
-line("RESTAURANT IMAGING (RI) \u2014 MILES, 8:00a\u201312:00p  (built off the June standards audit)",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
-line("\u2022 Miles runs RI 8:00a\u201312:00p on Wed/Thu/Fri/Mon/Tue (off Sat/Sun); CIP (ketchup-dispenser line) is folded into Tue + Thu mornings, marked '+CIP' on the Schedule tab. He's OUT of production coverage. Full day-by-day rotation is in the separate 'RI Program' document.")
+line("RESTAURANT IMAGING (RI) \u2014 REPRESENTATIVE PROTECTED WORK BLOCK",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
+line("\u2022 A designated sample record holds a protected weekday standards-work block outside production coverage; selected maintenance work is marked '+CIP' on the Schedule tab.")
 line("")
 line("TRAINING \u2014 EACH SHIFT HAS A CT ON STATION (purple / 'TRAIN'; extra body, not coverage)",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
-line("\u2022 Camila (kitchen, ~14 of 25 hrs) and Astrid (drive-thru, 18 of 25 hrs) each shadow a certified trainer on the same station/time, weekdays only (no Sat/Sun). Celeste gets her 3-hr DT training too. Trainees are EXTRA hands; the station is independently covered.")
-line("\u2022 Kept the training program running even though trainees aren't on the performer list \u2014 it doesn't take coverage hours from performers. Say the word if you'd rather pause it this week.")
+line("\u2022 Representative trainees shadow a certified trainer on the same station and time, weekdays only. Trainees are additive; required station coverage is independently staffed.")
+line("\u2022 Training remains a manager-controlled program dial and can be paused or rescheduled without weakening required production coverage.")
 line("")
 line("RULES APPLIED",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
-line("\u2022 Everyone on at 8:00a at the earliest (no shift before 8a). \u2022 3-hr minimum shift, one continuous shift per person per day. \u2022 No position worked more than 5 hrs (rotate stations); exempt anchors: Avery, Quinn, Tessa, Emil, Felix. \u2022 No close-then-open. \u2022 Registers capped at 2 at once, boards at 3.")
-line("\u2022 EZRA = evenings 5:00p\u2013close, open Sunday (per your confirmation; HotSchedules still shows the opposite 12a\u20135p \u2014 worth fixing in HS). \u2022 PALOMA off Tue 7/7 (vacation 7/7\u20137/18). \u2022 Silas & Kofi run front counter solo. \u2022 Tessa front/drive-thru only. \u2022 Paloma drive-thru only.")
-line("\u2022 A SECOND register runs at lunch on Wed\u2013Sun (helps speed of service and gives the front-counter performers hours). Say the word and I'll drop it to one register to trim labor.")
+line("\u2022 No shift starts before 8:00a. \u2022 Three-hour minimum shift and one continuous shift per person per day. \u2022 Five-hour station cap unless a record has an explicit anchor exception. \u2022 Close-then-open protection. \u2022 Register and board concurrency limits.")
+line("\u2022 Representative records encode evening-only, zone-only, trainee, anchor, and no-solo-close constraints without preserving real transient personnel or source-system exception notes.")
+line("\u2022 A second lunch register is a visible service-versus-labor decision that can be removed during manager review when demand does not justify it.")
 line("")
 line("COVERAGE & LABOR",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
 line("\u2022 ZERO coverage gaps across all seven days. Every required position-hour is staffed.")
-line("\u2022 Total ~803 hrs = production coverage at demand + Miles's 20-hr RI + trainee shadow hours. No production padding beyond demand.")
+line("\u2022 Total ~803 hrs = production coverage at demand + a representative 20-hr RI block + trainee shadow hours. No production padding beyond demand.")
 line("")
-line("NOT SCHEDULED THIS WEEK",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
-line("\u2022 Grady Holt, Lachlan Frost, Maren Kovac, Desmond Ruiz, Callum Voss, Estelle Fontaine, Beau Hendrix (departed / vacation / no current positions).")
-line("\u2022 Managers (Manager A, Sama, Manager B, Manager C, Manager D) run the separate MOD line, not the crew grid.")
+line("UNASSIGNED SAMPLE RECORDS",bold=True,size=11,fill=GRPFILL,color="FFFFFF")
+line("\u2022 Some representative records receive no assignment when demand, availability, qualifications, or priority rules do not produce a legal slot.")
+line("\u2022 Manager coverage is modeled separately from the crew grid and no real manager roster is published.")
 
 # ============ PER-DAY POSITION COVERAGE TIMELINES ============
 BARFILL={"K":PatternFill("solid",fgColor="F6C26B"),"D":PatternFill("solid",fgColor="8BB8E8"),
          "F":PatternFill("solid",fgColor="9CC79C"),"I":PatternFill("solid",fgColor="C5A3D6")}
 GAPFILL=PatternFill("solid",fgColor="E8473F")
 SLOTS=[8+0.5*i for i in range(34)]   # 8:00a .. 12:30a ; slot covers [t, t+0.5)
-DAYTAB={"Wed":"Wed 7-1","Thu":"Thu 7-2","Fri":"Fri 7-3","Sat":"Sat 7-4","Sun":"Sun 7-5","Mon":"Mon 7-6","Tue":"Tue 7-7"}
+DAYTAB={"Wed":"Wed Sample","Thu":"Thu Sample","Fri":"Fri Sample","Sat":"Sat Sample","Sun":"Sun Sample","Mon":"Mon Sample","Tue":"Tue Sample"}
 TLPOS=["RI","Grill","Board1","Board2","Board3","Toast","DTExp","DTOrd","DTOI","Cash"]
 def first(n): return NAMES[n].split()[0]
 def req_conc(day,pos,mid): return sum(1 for (s,e) in DEMAND[day].get(pos,[]) if s<=mid<e)
