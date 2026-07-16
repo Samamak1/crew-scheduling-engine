@@ -1,75 +1,203 @@
-# crew-scheduling-engine
+# Restaurant Crew Scheduling Engine
 
-Constraint-based weekly crew scheduler and Excel workbook generator for a store in a national quick-service restaurant chain. Built by Sama Mushtaq, the restaurant manager who runs the schedule, as working ops tooling rather than a demo: the original versions of these scripts produced the store's actual posted schedule.
+> An AI-assisted workforce scheduling system translating 43-person availability, station qualifications, training gates, and coverage rules into a leadership-ready Excel workbook.
 
-Published with the crew roster anonymized and corporate labor targets replaced with representative values. Details in "What is anonymized or redacted" below.
+The original versions of this tooling were used by Sama Mushtaq, then the restaurant manager responsible for the schedule, to produce posted weekly schedules. This public repository is a **sanitized representative reconstruction**: it preserves the operating model, constraints, assignment logic, workbook structure, and acceptance checks, but it does not contain the real roster, corporate labor targets, source screenshots, or an original posted schedule.
 
-![Schedule tab of the sample workbook, performer tier](docs/sample_schedule_tab.png)
+## Program brief
 
-## What it does
+| Field | Detail |
+|---|---|
+| Business challenge | Produce a feasible weekly schedule across nine restaurant positions while protecting coverage, labor discipline, training supervision, qualifications, and employee constraints. |
+| My role | Restaurant manager, operating-rule owner, scheduling decision-maker, and final acceptance reviewer. |
+| Users | Store leadership and managers receiving the weekly schedule, coverage checks, hours summary, and decision notes. |
+| Scale | One store, 43 representative crew records, seven days, nine positions, and an 11-tab output workbook. |
+| Delivery model | Manager-defined operating rules and acceptance decisions; AI-assisted Python implementation and iterative debugging. |
+| Status | The historical tooling supported posted schedules. The public code and workbook are a representative, anonymized regeneration for portfolio review. |
 
-Three files:
+## Business problem
 
-- `schedule_data.py` - the data. A 43-person roster with 7-day availability windows, solo-capable positions per person, weekly hour targets, and rule flags (closer, no-solo-close, exempt anchor, new hire, trainee, RI). Plus per-day, per-position demand windows for all 9 positions across kitchen, drive-thru, and front counter.
-- `gen7_engine.py` - the scheduling engine. Splits demand windows into 5-hour-max slots, assigns crew slot by slot (close slots first, then peak, then longest), then runs escalating gap-fill passes and a rebalancing loop. Writes `assignF.json`, `hoursF.json`, `training.json` and prints diagnostics: uncovered demand, training-shadow checks, per-person hours vs target, and register/board concurrency violations.
-- `build8_workbook_builder.py` - reads the engine's JSON output and renders an 11-tab Excel workbook with openpyxl: a grouped Schedule grid, seven per-day position coverage timelines, an hour-by-hour Coverage Check, an Hours Summary with a labor budget section, and a Notes and Decisions tab written for the leadership team.
+The schedule had to do more than fill hours. It needed to respect:
 
-`SCHEDULE_HANDOFF.md` is the actual working handoff document used to continue the build across AI sessions each week, kept as an artifact of the process (sanitized the same way as the code).
+- Opening and closing recovery
+- Position qualifications and station capacity
+- Minimum shift length and one continuous shift per day
+- Performance-priority direction
+- Training gates and Certified Trainer shadowing
+- Position-rotation expectations
+- Register and board concurrency caps
+- Labor demand without padding shifts simply to hit hour targets
 
-## Rules the engine encodes
+The operating requirement was a schedule leaders could inspect, explain, adjust, and post - not an opaque optimization result.
 
-House rules and operating constraints, all enforced in code:
+## System components
 
-- 8:00a floor: no shift starts before 8:00a.
-- 3-hour minimum shift, one continuous shift per person per day (no splits).
-- 5-hour position cap: nobody holds one position more than 5 hours; longer shifts rotate stations. A short list of exempt anchors may hold a station longer.
-- No close-then-open: a closer (shift ends 1:00a) cannot open before 11:00a the next day.
-- Concurrency limits: at most 2 registers and at most 3 boards staffed at any moment.
-- Per-person close capability and no-solo-close flags.
-- Trainee shadowing: every training block requires a Certified Trainer working the same position at the same time, weekdays only. Trainees are an extra body and never counted as coverage.
-- Performance-priority tiers: performers are scheduled first and may run up to 12 hours over their weekly target; everyone else is a fill-in used only where performers cannot cover.
-- Rebalancing: up to 400 iterations that move whole shifts from the most over-target performer to an under-target performer who can legally take them.
-- Three escalating gap-fill passes after the main assignment: a relaxed hours-cap fill, an adjacency-preferring gap closer, and a last-resort force fill with a 1.5-hour minimum block.
+### `schedule_data.py`
 
-## How to run
+The representative data module contains:
 
-```
+- A 43-person pseudonymous roster
+- Seven-day availability windows
+- Solo-capable positions for each person
+- Weekly hour targets
+- Closer, no-solo-close, exempt-anchor, performer, fill-in, trainee, and RI flags
+- Per-day, per-position demand windows across kitchen, drive-thru, and front counter
+
+### `gen7_engine.py`
+
+The scheduling engine:
+
+1. Splits demand windows into position slots capped at five hours.
+2. Prioritizes close slots, then peak slots, then longer blocks.
+3. Assigns performers before fill-ins where legal and operationally appropriate.
+4. Runs escalating gap-fill passes.
+5. Rebalances whole shifts from over-target to under-target qualified employees.
+6. Validates training shadows and concurrency limits.
+7. Writes assignment, hour, and training JSON files for the workbook builder.
+
+Generated intermediates:
+
+- `assignF.json`
+- `hoursF.json`
+- `training.json`
+
+### `build8_workbook_builder.py`
+
+The builder reads the engine output and creates an 11-tab workbook with `openpyxl`:
+
+1. Schedule
+2. Wednesday position coverage
+3. Thursday position coverage
+4. Friday position coverage
+5. Saturday position coverage
+6. Sunday position coverage
+7. Monday position coverage
+8. Tuesday position coverage
+9. Coverage Check
+10. Hours Summary and representative labor budget
+11. Notes and Decisions
+
+## Encoded operating rules
+
+- **8:00a floor:** no crew shift starts before 8:00a.
+- **Three-hour minimum:** assigned shifts must be at least three hours.
+- **One continuous shift:** no split shifts for the same person on the same day.
+- **Five-hour station cap:** no one holds a single station for more than five hours unless explicitly marked as an exempt anchor.
+- **Close-then-open protection:** a 1:00a closer cannot open before 11:00a the following day.
+- **Concurrency caps:** no more than two registers and three boards at the same moment.
+- **Close capability:** closing assignments respect person-level closer and no-solo-close flags.
+- **Training supervision:** every training block requires a Certified Trainer on the same position at the same time.
+- **Trainees are additive:** trainees do not count toward required production coverage.
+- **Weekday training:** training blocks are not assigned on Saturday or Sunday.
+- **Performance priority:** designated performers carry the core schedule; fill-ins cover legal gaps performers cannot take.
+- **Target overage cap:** performers may be scheduled up to 12 hours above their representative weekly target.
+- **Cross-training gates:** the operating model tracks prerequisite hours before training in a new zone and supervised hours before solo qualification.
+- **Restaurant Imaging block:** weekday RI work is separated from production coverage and marked where CIP work occurs.
+
+## Assignment strategy
+
+The public engine is a greedy heuristic with local rebalancing:
+
+1. Build legal candidate lists for each slot.
+2. Assign high-priority and hard-to-fill slots first.
+3. Prefer qualified performers within hour and availability constraints.
+4. Run a relaxed-hours fill for remaining gaps.
+5. Run an adjacency-preferring gap closer.
+6. Use a last-resort force fill with a 1.5-hour minimum block where required.
+7. Run up to 400 rebalancing iterations, moving whole legal shifts to reduce extreme target variance.
+
+It aims for a fast, explainable feasible schedule. It does not prove mathematical optimality.
+
+## Run the representative build
+
+```bash
 pip install openpyxl
-python3 gen7_engine.py
-python3 build8_workbook_builder.py
+python gen7_engine.py
+python build8_workbook_builder.py
 ```
 
-Run both from the repo root. The engine prints diagnostics and writes three JSON intermediates (gitignored, regenerated every run); the builder writes `sample_output/Crew_Schedule_SAMPLE.xlsx`.
+Run both files from the repository root. The engine prints diagnostics and writes the three gitignored JSON intermediates. The builder writes:
 
-The committed sample workbook was generated exactly this way from the anonymized data. On this dataset the engine reports 0.00 uncovered demand hours, every training block has a Certified Trainer on station, the register/board concurrency check passes, and total scheduled hours are 803.0.
+```text
+sample_output/Crew_Schedule_SAMPLE.xlsx
+```
 
-## Sample output
+## Sample validation result
 
-`sample_output/Crew_Schedule_SAMPLE.xlsx` has 11 tabs:
+On the committed representative dataset:
 
-1. Schedule - crew grid grouped by tier (Performers, Fill-ins, Trainees, RI), color-coded by station, with weekly hours. The screenshot above is the first page of this tab.
-2. Wed 7-1 through Tue 7-7 (seven tabs) - per-day position coverage timelines: who is on each position each half hour, red for required-but-uncovered, purple for trainee shadows.
-3. Coverage Check - scheduled bodies vs requirement per position per hour, all seven days.
-4. Hours Summary - per-person daily and weekly hours vs target (live formulas), plus the daily labor budget section.
-5. Notes and Decisions - the decision log handed to leadership with the schedule.
+- Uncovered demand: `0.00` hours
+- Total scheduled hours: `803.0`
+- Every training block has a Certified Trainer on the same station
+- Register and board concurrency checks pass
+- The workbook includes per-person target comparisons and leadership decision notes
 
-## What is anonymized or redacted
+These are validation results for the anonymized sample dataset, not claims about a specific employer week or labor outcome.
 
-- Every crew name is a pseudonym, consistent across both scripts, the handoff document, and the sample workbook. The real roster is private.
-- Manager names other than Sama are generic labels (Manager A through D).
-- The labor Optimal/Target numbers (`OPT` and `TGT` in the workbook builder) and the weekly deployment total are representative round placeholders. The real values are the company's internal forecasts and are redacted; the code marks those lines with a comment.
-- No original store documents or the posted schedule are included. The committed workbook is a fresh regeneration from the anonymized data.
-- Everything else is real: availability shapes, demand windows, rules, priorities, and the engine logic itself.
+## Evidence and provenance
 
-## Limitations, stated plainly
+| Item | Evidence status |
+|---|---|
+| Python engine and builder | Sanitized representative reconstruction of operational tooling. |
+| Roster and availability | Pseudonymous and representative; real identities withheld. |
+| Sample workbook | Fresh regeneration from public representative data; not an original posted schedule. |
+| Coverage and training results | Reproducible on the committed representative dataset. |
+| Historical operational use | Leadership-account claim: original versions supported posted schedules. |
+| Labor targets | Representative placeholders; corporate forecasts withheld. |
 
-- It is a greedy heuristic with local rebalancing, not an ILP or CP-SAT model. It produces a good feasible schedule quickly; it does not prove optimality.
-- The roster and availability are hard-coded in `schedule_data.py`, transcribed weekly from HotSchedules screenshots. Changing the week means editing the data module.
-- Single week, single store. Demand windows and workbook layout are tuned to this store's stations.
-- Diagnostics are prints, not automated tests. Correctness was verified by the manager reading the diagnostics and the workbook's own coverage checks before posting each week.
-- The original scripts were coupled by the builder exec-ing the top half of the engine file. The published version replaces that with the shared `schedule_data.py` module; the handoff document describes the original wiring.
-- Built with AI assistance (Claude) as a coding partner. The rules, roster knowledge, priorities, and every acceptance decision came from the manager; the handoff document in this repo is the real artifact used to direct that collaboration.
+## Repository contents
+
+| Path | Purpose |
+|---|---|
+| `README.md` | Business context, operating model, evidence status, and limitations. |
+| `schedule_data.py` | Public representative roster, availability, demand, and rule flags. |
+| `gen7_engine.py` | Assignment, gap-fill, rebalancing, and diagnostics. |
+| `build8_workbook_builder.py` | Leadership-facing Excel workbook generation. |
+| `sample_output/Crew_Schedule_SAMPLE.xlsx` | Representative 11-tab output. |
+| `docs/sample_schedule_tab.png` | Screenshot of the representative Schedule tab. |
+| `SCHEDULE_HANDOFF.md` | Sanitized historical AI-session handoff artifact; not current operating instruction. |
+
+`SCHEDULE_HANDOFF.md` preserves how requirements and acceptance decisions were carried across AI sessions. It still contains detailed representative weekly context and should receive a separate confidentiality review before any future republication. Vendor-specific connector mechanics and transient personnel notes are not needed for the recruiter narrative.
+
+## Role, contributors, and authorship
+
+Sama Mushtaq supplied the operating context, roster logic, station rules, priorities, qualifications, demand interpretation, manager decision log, and final acceptance decisions. He reviewed diagnostics and workbook outputs before the historical schedules were posted.
+
+The public repository does not claim that every historical implementation line was manually typed by Sama. The leadership artifact is the translation of real operating constraints into requirements, testable rules, exceptions, and accepted outputs.
+
+## AI assistance
+
+Claude was used as a coding partner during the historical build. AI assisted with implementation, iteration, and workbook construction. Sama remained responsible for:
+
+- Operating-rule definition
+- Roster and availability interpretation
+- Priority and exception decisions
+- Training and qualification constraints
+- Output review and acceptance
+- The decision to post or revise a schedule
+
+AI did not independently determine store policy, employee qualifications, labor targets, or the final posted schedule.
+
+## Confidentiality
+
+- Every public crew name is a pseudonym.
+- Manager names other than Sama use generic labels.
+- Corporate labor targets and forecasts are representative placeholders.
+- No HotSchedules screenshot, source employee record, original posted schedule, or employer document is included.
+- The public workbook is regenerated from representative data.
+- Detailed internal rules and handoff context should be reviewed periodically for triangulation risk even when names are changed.
+
+## Limitations
+
+- Greedy heuristic with local rebalancing; not ILP or CP-SAT and no proof of optimality.
+- Single week and single-store operating model.
+- Roster and availability are hard-coded rather than imported through a user interface.
+- Demand windows and workbook layout are tuned to one restaurant environment.
+- Diagnostics are printed acceptance checks, not a full automated test suite.
+- Historical source wiring was refactored for publication, so the public code is representative rather than byte-for-byte identical.
+- A feasible schedule still requires manager review for real-world information not captured in the model.
 
 ## Related
 
-`restaurant-imaging-program` (same portfolio) documents the Restaurant Imaging program behind the weekday 8:00a to 12:00p RI block that this engine carves out of production coverage.
+- [Restaurant Imaging corrective-action program](https://github.com/Samamak1/restaurant-imaging-program)
+- [Sama Mushtaq program leadership portfolio](https://samamak1.github.io/)
