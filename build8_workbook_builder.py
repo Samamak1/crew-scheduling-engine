@@ -86,7 +86,7 @@ for n in pday:
 wb=Workbook()
 # ============ SHEET 1: SCHEDULE ============
 ws=wb.active; ws.title="Schedule"
-ws["A1"]="CREW SCHEDULE (ANONYMIZED SAMPLE)   |   Week of Wed 7/1 – Tue 7/7/26"
+ws["A1"]="CREW SCHEDULE (ANONYMIZED SAMPLE)   |   Week of Wed 7/1 - Tue 7/7/26"
 ws["A1"].font=ARIAL(bold=True,size=14,color="FFFFFF"); ws["A1"].fill=HEADFILL
 ws["A1"].alignment=Alignment(vertical="center",horizontal="left",indent=1)
 ws.merge_cells("A1:J1"); ws.row_dimensions[1].height=26
@@ -134,7 +134,7 @@ ws.freeze_panes="C4"
 
 # ============ SHEET 2: COVERAGE CHECK ============
 cv=wb.create_sheet("Coverage Check")
-cv["A1"]="COVERAGE CHECK — bodies on each position per hour vs. deployment requirement"
+cv["A1"]="COVERAGE CHECK - bodies on each position per hour vs. deployment requirement"
 cv["A1"].font=ARIAL(bold=True,size=13,color="FFFFFF"); cv["A1"].fill=HEADFILL
 HRS=list(range(8,25))  # 8a .. 12a(midnight start) ; bucket h = h:00-h+1:00 ; 24 = 12a-1a
 cv.merge_cells(start_row=1,start_column=1,end_row=1,end_column=2+len(HRS))
@@ -174,7 +174,7 @@ cv.freeze_panes="C3"
 
 # ============ SHEET 3: HOURS SUMMARY ============
 hs=wb.create_sheet("Hours Summary")
-hs["A1"]="HOURS SUMMARY — weekly hours vs. tier target"
+hs["A1"]="HOURS SUMMARY - weekly hours vs. tier target"
 hs["A1"].font=ARIAL(bold=True,size=13,color="FFFFFF"); hs["A1"].fill=HEADFILL
 hs.merge_cells("A1:M1")
 hh=["Crew","Tier"]+[DATES[d] for d in DAYS]+["Week","Target","+/-","Status"]
@@ -201,16 +201,16 @@ for title,members in GROUPS:
 hs.cell(rr,1,"TOTAL").font=ARIAL(bold=True,size=10); hs.cell(rr,10,f"=SUM(J3:J{rr-1})").font=ARIAL(bold=True,size=10)
 hs.cell(rr,10).alignment=Alignment(horizontal="center")
 hs.cell(rr,11,"deployment need:"); hs.cell(rr,11).font=ARIAL(size=9,italic=True)
-hs.cell(rr,12,750).font=ARIAL(size=10,bold=True)  # representative — real weekly deployment total redacted
+hs.cell(rr,12,750).font=ARIAL(size=10,bold=True)  # representative - real weekly deployment total redacted
 
 # labor budget per day vs deployment optimal/target
-# representative targets — real values redacted
+# representative targets - real values redacted
 # (the store's actual Optimal/Target labor hours come from the company's internal
 #  deployment forecasts; these are round placeholder numbers of similar magnitude)
 OPT={"Wed":None,"Thu":None,"Fri":120,"Sat":125,"Sun":125,"Mon":90,"Tue":90}
 TGT={"Wed":None,"Thu":None,"Fri":100,"Sat":105,"Sun":105,"Mon":75,"Tue":75}
 br=rr+3
-hs.cell(br,1,"LABOR BUDGET CHECK — scheduled hrs vs. deployment").font=ARIAL(bold=True,size=11,color="FFFFFF")
+hs.cell(br,1,"LABOR BUDGET CHECK - scheduled hrs vs. deployment").font=ARIAL(bold=True,size=11,color="FFFFFF")
 for c in range(1,6): hs.cell(br,c).fill=GRPFILL
 hs.merge_cells(start_row=br,start_column=1,end_row=br,end_column=5); br+=1
 for c,h in enumerate(["Day","Scheduled","Optimal","Target","vs Optimal"],1):
@@ -220,13 +220,13 @@ for d in DAYS:
     sched=round(sum(sum(e-s for (s,e,p) in pday[n].get(d,[])) for n in pday),1)
     hs.cell(br,1,DATES[d]).font=ARIAL(size=9,bold=True); hs.cell(br,1).border=BORDER
     hs.cell(br,2,sched).font=ARIAL(size=9); hs.cell(br,2).alignment=Alignment(horizontal="center"); hs.cell(br,2).border=BORDER
-    hs.cell(br,3,OPT[d] if OPT[d] else "—").font=ARIAL(size=9); hs.cell(br,3).alignment=Alignment(horizontal="center"); hs.cell(br,3).border=BORDER
-    hs.cell(br,4,TGT[d] if TGT[d] else "—").font=ARIAL(size=9); hs.cell(br,4).alignment=Alignment(horizontal="center"); hs.cell(br,4).border=BORDER
+    hs.cell(br,3,OPT[d] if OPT[d] else "-").font=ARIAL(size=9); hs.cell(br,3).alignment=Alignment(horizontal="center"); hs.cell(br,3).border=BORDER
+    hs.cell(br,4,TGT[d] if TGT[d] else "-").font=ARIAL(size=9); hs.cell(br,4).alignment=Alignment(horizontal="center"); hs.cell(br,4).border=BORDER
     if OPT[d]:
         diff=round(sched-OPT[d],1); c=hs.cell(br,5,diff); c.alignment=Alignment(horizontal="center"); c.border=BORDER
         c.font=ARIAL(size=9,bold=True,color=("A00000" if diff>3 else "1F7A1F"))
     else:
-        hs.cell(br,5,"—").font=ARIAL(size=9); hs.cell(br,5).alignment=Alignment(horizontal="center"); hs.cell(br,5).border=BORDER
+        hs.cell(br,5,"-").font=ARIAL(size=9); hs.cell(br,5).alignment=Alignment(horizontal="center"); hs.cell(br,5).border=BORDER
     br+=1
 hs.cell(br,1,"Optimal/Target are representative placeholder values (the real deployment numbers are redacted for publication). Negative = under budget (good).").font=ARIAL(italic=True,size=8,color="666666")
 hs.merge_cells(start_row=br,start_column=1,end_row=br,end_column=5)
@@ -309,7 +309,7 @@ def merge_runs(ws,row,c0,n):
 def build_timeline(wb):
     for day in DAYS:
         ws=wb.create_sheet(DAYTAB[day])
-        ws.cell(1,1,f"{DATES[day]}  —  POSITION COVERAGE TIMELINE").font=ARIAL(bold=True,size=13,color="FFFFFF")
+        ws.cell(1,1,f"{DATES[day]}  -  POSITION COVERAGE TIMELINE").font=ARIAL(bold=True,size=13,color="FFFFFF")
         ws.cell(1,1).fill=HEADFILL
         ws.merge_cells(start_row=1,start_column=1,end_row=1,end_column=2+len(SLOTS))
         ws.cell(2,1,"Each bar = who covers that position over time.  RED = required but uncovered.  PURPLE = trainee shadowing a CT (NOT counted as coverage).  K=Kitchen D=DriveThru F=Front").font=ARIAL(italic=True,size=9,color="555555")
